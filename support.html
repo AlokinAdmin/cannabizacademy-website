@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cannabiz Academy</title>
+<link rel="stylesheet" href="colors_and_type.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-body); background: #000; color: #fff; -webkit-font-smoothing: antialiased; line-height: 1.5; overflow-x: hidden; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; cursor: pointer; background: none; border: none; color: inherit; }
+  img { display: block; max-width: 100%; }
+
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    mix-blend-mode: overlay; opacity: .55;
+  }
+
+  .page { display: none; min-height: 100vh; flex-direction: column; }
+  .page.active { display: flex; }
+
+  /* NAV */
+  .nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px; height: 64px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    position: sticky; top: 0; z-index: 200;
+    background: rgba(0,0,0,.92); backdrop-filter: blur(12px);
+  }
+  .nav-logo { height: 26px; width: auto; }
+  .nav-right { display: flex; align-items: center; gap: 20px; }
+  .nav-link { font-size: 12px; font-weight: 600; letter-spacing: .08em; color: rgba(255,255,255,.5); transition: color .2s; }
+  .nav-link:hover { color: #fff; }
+  .nav-cta {
+    font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    background: var(--cba-mint); color: #000; padding: 9px 16px;
+    border: 1.5px solid #000; box-shadow: 3px 3px 0 rgba(18,232,162,.3);
+    transition: transform .12s, box-shadow .12s;
+  }
+  .nav-cta:hover { transform: translate(1px,1px); box-shadow: 1px 1px 0 rgba(18,232,162,.3); }
+
+  /* SHARED */
+  .container { max-width: 760px; margin: 0 auto; padding: 0 40px; }
+  .container.wide { max-width: 1100px; }
+  .mint { color: var(--cba-mint); }
+  .eyebrow {
+    font-size: 11px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--cba-mint); display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+  }
+  .eyebrow::before { content: ''; display: inline-block; width: 14px; height: 2px; background: var(--cba-mint); }
+
+  .page-hero { padding: 64px 40px 48px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .page-hero h1 {
+    font-family: var(--font-display); font-size: clamp(36px, 6vw, 72px);
+    text-transform: uppercase; line-height: .95; letter-spacing: .01em; margin-bottom: 14px;
+  }
+  .page-hero p { font-size: 16px; color: rgba(255,255,255,.6); line-height: 1.65; max-width: 520px; }
+
+  .body-section { padding: 56px 40px 80px; flex: 1; }
+
+  /* FOOTER */
+  .footer {
+    padding: 24px 40px; border-top: 1px solid rgba(255,255,255,.08);
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+    font-size: 12px; color: rgba(255,255,255,.35);
+  }
+  .footer a { color: rgba(255,255,255,.35); transition: color .2s; }
+  .footer a:hover { color: var(--cba-mint); }
+  .footer-links { display: flex; gap: 20px; }
+
+  /* ── SIGN IN ── */
+  .signin-card {
+    background: rgba(255,255,255,.03); border: 1.5px solid rgba(255,255,255,.12);
+    padding: 48px; max-width: 480px;
+  }
+  .signin-card h2 { font-family: var(--font-heading); font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .signin-card p { font-size: 14px; color: rgba(255,255,255,.6); margin-bottom: 32px; line-height: 1.6; }
+  .form-group { margin-bottom: 20px; }
+  .form-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 8px; }
+  .form-input {
+    width: 100%; padding: 13px 16px; background: rgba(255,255,255,.05);
+    border: 1.5px solid rgba(255,255,255,.15); color: #fff;
+    font-family: var(--font-body); font-size: 15px;
+    transition: border-color .2s;
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--cba-mint); }
+  .form-input::placeholder { color: rgba(255,255,255,.3); }
+  .form-submit {
+    width: 100%; padding: 16px; margin-top: 8px;
+    background: var(--cba-mint); color: #000; border: 1.5px solid #000;
+    font-family: var(--font-body); font-size: 12px; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+    box-shadow: 5px 5px 0 rgba(18,232,162,.25);
+    cursor: pointer; transition: transform .12s, box-shadow .12s;
+  }
+  .form-submit:hover { transform: translate(2px,2px); box-shadow: 2px 2px 0 rgba(18,232,162,.25); }
+  .form-divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
+  .form-divider span { font-size: 11px; color: rgba(255,255,255,.3); white-space: nowrap; }
+  .form-divider::before, .form-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.1); }
+  .form-secondary {
+    width: 100%; padding: 14px; background: transparent; color: rgba(255,255,255,.7);
+    border: 1.5px solid rgba(255,255,255,.2); font-family: var(--font-body);
+    font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    cursor: pointer; transition: border-color .2s, color .2s;
+  }
+  .form-secondary:hover { border-color: var(--cba-mint); color: var(--cba-mint); }
+  .form-footer { margin-top: 24px; font-size: 12.5px; color: rgba(255,255,255,.45); text-align: center; line-height: 1.6; }
+  .form-footer a { color: var(--cba-mint); }
+
+  /* ── DASHBOARD ── */
+  .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1.5px solid rgba(255,255,255,.12); margin-bottom: 40px; }
+  @media (max-width: 700px) { .dash-grid { grid-template-columns: 1fr; } }
+  .dash-card {
+    padding: 32px 28px; border-right: 1px solid rgba(255,255,255,.1);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .dash-card:last-child { border-right: none; }
+  .dash-card-num { font-family: var(--font-display); font-size: 11px; color: rgba(255,255,255,.2); letter-spacing: .18em; text-transform: uppercase; }
+  .dash-card-name { font-family: var(--font-heading); font-size: 20px; font-weight: 700; }
+  .dash-card-desc { font-size: 13px; color: rgba(255,255,255,.55); line-height: 1.6; flex: 1; }
+  .dash-card-status { font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 3px 8px; display: inline-flex; align-items: center; gap: 5px; width: fit-content; }
+  .dash-card-status.live { color: var(--cba-mint); border: 1px solid rgba(18,232,162,.3); background: rgba(18,232,162,.08); }
+  .dash-card-status.beta { color: #fb923c; border: 1px solid rgba(251,146,60,.3); background: rgba(251,146,60,.08); }
+  .dash-card-status .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+  .dash-cta {
+    display: flex; align-items: center; justify-content: center;
+    padding: 11px 16px; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    border: 1.5px solid rgba(255,255,255,.2); color: rgba(255,255,255,.7);
+    transition: border-color .2s, color .2s; margin-top: 4px;
+  }
+  .dash-cta:hover { border-color: var(--cba-mint); color: var(--cba-mint); }
+  .dash-cta.primary { background: var(--cba-mint); color: #000; border-color: var(--cba-mint); box-shadow: 4px 4px 0 rgba(18,232,162,.2); }
+  .dash-cta.primary:hover { transform: translate(1px,1px); box-shadow: 2px 2px 0 rgba(18,232,162,.2); }
+
+  .beta-notice {
+    background: rgba(251,146,60,.06); border: 1px solid rgba(251,146,60,.25);
+    border-left: 3px solid #fb923c; padding: 20px 24px; margin-bottom: 36px;
+    font-size: 13.5px; line-height: 1.65; color: rgba(255,255,255,.75);
+  }
+  .beta-notice strong { color: #fff; }
+  .beta-notice .title { font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #fb923c; margin-bottom: 8px; }
+
+  /* ── TERMS ── */
+  .terms-body { max-width: 720px; }
+  .terms-body h2 { font-family: var(--font-heading); font-size: 20px; font-weight: 700; margin: 40px 0 12px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,.08); }
+  .terms-body h2:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+  .terms-body p { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,.7); margin-bottom: 14px; }
+  .terms-body ul { padding-left: 20px; margin-bottom: 14px; }
+  .terms-body li { font-size: 14px; line-height: 1.8; color: rgba(255,255,255,.7); margin-bottom: 6px; }
+  .terms-body a { color: var(--cba-mint); }
+  .terms-meta { font-size: 12px; color: rgba(255,255,255,.35); margin-bottom: 40px; padding-bottom: 28px; border-bottom: 1px solid rgba(255,255,255,.08); }
+
+  /* ── SUPPORT ── */
+  .support-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 48px; }
+  @media (max-width: 700px) { .support-grid { grid-template-columns: 1fr; } }
+  .support-option {
+    background: rgba(255,255,255,.03); border: 1.5px solid rgba(255,255,255,.1);
+    padding: 28px 24px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .support-option-icon { font-size: 24px; margin-bottom: 4px; }
+  .support-option-name { font-family: var(--font-heading); font-size: 18px; font-weight: 700; }
+  .support-option-desc { font-size: 13px; color: rgba(255,255,255,.6); line-height: 1.6; flex: 1; }
+  .support-option-cta {
+    display: flex; align-items: center; justify-content: center;
+    padding: 11px 16px; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    border: 1.5px solid rgba(255,255,255,.2); color: rgba(255,255,255,.7); margin-top: 4px;
+    transition: border-color .2s, color .2s;
+  }
+  .support-option-cta:hover { border-color: var(--cba-mint); color: var(--cba-mint); }
+  .support-form { background: rgba(255,255,255,.02); border: 1px solid rgba(255,255,255,.1); padding: 36px; margin-bottom: 40px; }
+  .support-form h3 { font-family: var(--font-heading); font-size: 20px; font-weight: 700; margin-bottom: 24px; }
+  .select-input {
+    width: 100%; padding: 13px 16px; background: rgba(255,255,255,.05);
+    border: 1.5px solid rgba(255,255,255,.15); color: #fff;
+    font-family: var(--font-body); font-size: 15px; outline: none;
+    transition: border-color .2s; appearance: none;
+  }
+  .select-input:focus { border-color: var(--cba-mint); }
+  .select-input option { background: #111; }
+  .textarea-input {
+    width: 100%; padding: 13px 16px; background: rgba(255,255,255,.05);
+    border: 1.5px solid rgba(255,255,255,.15); color: #fff;
+    font-family: var(--font-body); font-size: 14px; outline: none; resize: vertical; min-height: 120px;
+    transition: border-color .2s;
+  }
+  .textarea-input:focus { border-color: var(--cba-mint); }
+  .textarea-input::placeholder { color: rgba(255,255,255,.3); }
+
+  @media (max-width: 600px) {
+    .nav { padding: 0 20px; }
+    .page-hero { padding: 48px 20px 36px; }
+    .body-section { padding: 40px 20px 60px; }
+    .footer { padding: 20px; }
+    .signin-card { padding: 32px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════
+     SIGN IN
+════════════════════════════════════ -->
+<div class="page" id="page-signin">
+  <nav class="nav">
+    <a href="CBA Operator Toolkit v2.html"><img class="nav-logo" src="assets/logo-cba-white.png" alt="Cannabiz Academy"></a>
+    <div class="nav-right">
+      <a href="CBA Operator Toolkit v2.html" class="nav-link">Back to Toolkit</a>
+      <a href="https://alokin.io/checkout#membership" class="nav-cta" target="_blank">Join QP Club</a>
+    </div>
+  </nav>
+
+  <div class="page-hero">
+    <div class="container">
+      <div class="eyebrow">Cannabiz Academy</div>
+      <h1>Sign <span class="mint">In.</span></h1>
+      <p>Access your calculators, PackTrack, and operator dashboard.</p>
+    </div>
+  </div>
+
+  <div class="body-section">
+    <div class="container">
+      <div class="signin-card">
+        <h2>Welcome back.</h2>
+        <p>Enter your email and password to access your dashboard. Don't have an account? Purchase a tool to get started.</p>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input class="form-input" type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="form-submit" onclick="handleSignIn()">Sign In →</button>
+
+        <div class="form-divider"><span>or</span></div>
+        <button class="form-secondary" onclick="handleMagicLink()">Send Magic Link →</button>
+
+        <div class="form-footer">
+          <a href="#" onclick="navigate('signin'); document.getElementById('email').focus()">Forgot password?</a> &nbsp;·&nbsp;
+          New here? <a href="https://alokin.io/checkout" target="_blank">Get a tool first →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>© 2026 Cannabiz Academy · Powered by Alokin Technology LLC</div>
+    <div class="footer-links">
+      <a href="#terms" onclick="navigate('terms')">Terms</a>
+      <a href="#support" onclick="navigate('support')">Support</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════
+     DASHBOARD (Beta)
+════════════════════════════════════ -->
+<div class="page" id="page-dashboard">
+  <nav class="nav">
+    <a href="CBA Operator Toolkit v2.html"><img class="nav-logo" src="assets/logo-cba-white.png" alt="Cannabiz Academy"></a>
+    <div class="nav-right">
+      <a href="#signin" onclick="navigate('signin')" class="nav-link">Sign Out</a>
+      <a href="https://alokin.io/checkout#membership" class="nav-cta" target="_blank">Upgrade</a>
+    </div>
+  </nav>
+
+  <div class="page-hero">
+    <div class="container wide">
+      <div class="eyebrow">Member Dashboard · Beta</div>
+      <h1>Your <span class="mint">tools.</span></h1>
+      <p>Everything you've purchased is live below. Downloadable files unlock at beta exit.</p>
+    </div>
+  </div>
+
+  <div class="body-section">
+    <div class="container wide">
+
+      <div class="beta-notice">
+        <div class="title">⚡ Beta Access</div>
+        <strong>You're in early.</strong> All tools you've purchased are accessible online through this dashboard. When beta closes, you'll also receive downloadable HTML files for every calculator you own. One purchase, both modes. No action needed on your end.
+      </div>
+
+      <div class="dash-grid">
+        <div class="dash-card">
+          <div class="dash-card-num">01</div>
+          <div class="dash-card-name">Product Profit Calculator</div>
+          <div class="dash-card-desc">Real COGS and margin per SKU. Know your numbers before you price anything.</div>
+          <div class="dash-card-status live"><span class="dot"></span>Live</div>
+          <a href="#" class="dash-cta primary">Open Calculator →</a>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-num">02</div>
+          <div class="dash-card-name">Distro Calculator</div>
+          <div class="dash-card-desc">Full distribution math, solo and partner splits, deal-by-deal margin modeling.</div>
+          <div class="dash-card-status live"><span class="dot"></span>Live</div>
+          <a href="#" class="dash-cta primary">Open Calculator →</a>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-num">03</div>
+          <div class="dash-card-name">Outdoor &amp; Rosin Calculator</div>
+          <div class="dash-card-desc">Real grow economics for outdoor, dep, and rosin operations.</div>
+          <div class="dash-card-status live"><span class="dot"></span>Live</div>
+          <a href="#" class="dash-cta primary">Open Calculator →</a>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-num">04</div>
+          <div class="dash-card-name">PackTrack Lite</div>
+          <div class="dash-card-desc">Mobile-first wholesale tracking. COGS, margins, deals, commissions.</div>
+          <div class="dash-card-status live"><span class="dot"></span>Live</div>
+          <a href="#" class="dash-cta">Launch PackTrack →</a>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-num">05</div>
+          <div class="dash-card-name">PackTrack XL</div>
+          <div class="dash-card-desc">Full Brand OS, desktop interface, agentic AI flows. Includes Lite during beta.</div>
+          <div class="dash-card-status beta"><span class="dot"></span>Beta</div>
+          <a href="#" class="dash-cta">Launch XL →</a>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-num">06</div>
+          <div class="dash-card-name">Chain + Ticket</div>
+          <div class="dash-card-desc">Trust layer and deal flow engine. License verification and AI-matched deals.</div>
+          <div class="dash-card-status beta"><span class="dot"></span>Beta</div>
+          <a href="#" class="dash-cta">Launch Chain + Ticket →</a>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:32px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:6px">Not seeing a tool?</div>
+          <div style="font-size:13.5px;color:rgba(255,255,255,.6)">Email <a href="mailto:info@cannabizacademy.io" style="color:var(--cba-mint)">info@cannabizacademy.io</a> with your order number and we'll sort it.</div>
+        </div>
+        <a href="https://alokin.io/checkout" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border:1.5px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:border-color .2s,color .2s" onmouseover="this.style.borderColor='#12E8A2';this.style.color='#12E8A2'" onmouseout="this.style.borderColor='rgba(255,255,255,.2)';this.style.color='rgba(255,255,255,.6)'">Add More Tools →</a>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>© 2026 Cannabiz Academy · Powered by Alokin Technology LLC</div>
+    <div class="footer-links">
+      <a href="#terms" onclick="navigate('terms')">Terms</a>
+      <a href="#support" onclick="navigate('support')">Support</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════
+     TERMS OF SERVICE
+════════════════════════════════════ -->
+<div class="page" id="page-terms">
+  <nav class="nav">
+    <a href="CBA Operator Toolkit v2.html"><img class="nav-logo" src="assets/logo-cba-white.png" alt="Cannabiz Academy"></a>
+    <div class="nav-right">
+      <a href="CBA Operator Toolkit v2.html" class="nav-link">Back to Toolkit</a>
+    </div>
+  </nav>
+
+  <div class="page-hero">
+    <div class="container">
+      <div class="eyebrow">Legal</div>
+      <h1>Terms of <span class="mint">Service.</span></h1>
+      <p>Please read these terms carefully before purchasing or using any Cannabiz Academy or Alokin products.</p>
+    </div>
+  </div>
+
+  <div class="body-section">
+    <div class="container">
+      <div class="terms-meta">Last updated: April 2026 &nbsp;·&nbsp; Cannabiz Academy / Alokin Technology LLC</div>
+      <div class="terms-body">
+
+        <h2>1. Acceptance of Terms</h2>
+        <p>By purchasing, accessing, or using any product offered by Cannabiz Academy or Alokin Technology LLC (collectively "we," "us," or "our"), you agree to be bound by these Terms of Service. If you do not agree, do not use our products.</p>
+
+        <h2>2. Products and Access</h2>
+        <p>We offer two categories of products:</p>
+        <ul>
+          <li><strong>Calculators (one-time purchase):</strong> Business intelligence tools delivered as web-based applications. Upon purchase, you receive lifetime access to the tool in your member dashboard. During beta, access is online only. After beta exit, you will also receive downloadable HTML files.</li>
+          <li><strong>SaaS Subscriptions:</strong> PackTrack Lite, PackTrack XL, and Chain + Ticket Duo are monthly subscription products operated by Alokin Technology LLC. Access continues as long as your subscription is active.</li>
+        </ul>
+        <p>Beta products are provided as-is with access subject to availability. We reserve the right to modify, pause, or update beta products at any time with reasonable notice.</p>
+
+        <h2>3. Payments and Billing</h2>
+        <p>All payments are processed by Stripe on behalf of Alokin Technology LLC. By completing a purchase, you authorize us to charge the payment method provided. All prices are in USD.</p>
+        <p>For monthly subscriptions, billing recurs automatically on the same date each month until cancelled. For beta products, the one-month upfront payment covers your 4th month of service after beta closes; months 1–3 post-beta are provided free of charge.</p>
+        <p>QP Annual membership pricing and discounts are valid for the duration of the annual subscription period and apply as described at time of purchase.</p>
+
+        <h2>4. Refunds</h2>
+        <p>Calculator purchases (one-time): Refunds are considered on a case-by-case basis within 7 days of purchase if the tool cannot be accessed or is materially different from its description. Contact <a href="mailto:info@cannabizacademy.io">info@cannabizacademy.io</a> with your order number.</p>
+        <p>Subscriptions: You may cancel at any time. Cancellation stops future billing; no partial refunds are issued for the current billing period. Beta upfront payments are non-refundable once beta access has been granted.</p>
+
+        <h2>5. Acceptable Use</h2>
+        <p>Our tools are licensed for personal business use by the purchasing operator or entity. You may not:</p>
+        <ul>
+          <li>Resell, sublicense, or redistribute our calculators or software</li>
+          <li>Share login credentials or dashboard access with third parties outside your organization</li>
+          <li>Reverse-engineer, copy, or reproduce the underlying logic or code of any product</li>
+          <li>Use our tools for any unlawful purpose</li>
+        </ul>
+
+        <h2>6. Intellectual Property</h2>
+        <p>All content, tools, calculators, brand assets, and software are the intellectual property of Cannabiz Academy and Alokin Technology LLC. The purchase of a product grants you a non-exclusive, non-transferable license to use that product for your own business operations.</p>
+
+        <h2>7. Disclaimers</h2>
+        <p>Our calculators and tools provide business intelligence outputs based on inputs you provide. They are not legal, financial, or compliance advice. Outputs should be reviewed by qualified professionals before being relied upon for business decisions. We make no guarantees about the accuracy of outputs relative to your specific market conditions.</p>
+        <p>Cannabis is a federally controlled substance in the United States. Our tools are designed for use by licensed operators in jurisdictions where cannabis is legal. We do not facilitate or encourage any unlawful activity.</p>
+
+        <h2>8. Limitation of Liability</h2>
+        <p>To the maximum extent permitted by law, Cannabiz Academy and Alokin Technology LLC shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of our products. Our total liability to you shall not exceed the amount you paid us in the 12 months preceding the claim.</p>
+
+        <h2>9. Governing Law</h2>
+        <p>These terms are governed by the laws of the State of California. Any disputes shall be resolved in the courts of California.</p>
+
+        <h2>10. Changes to Terms</h2>
+        <p>We may update these terms from time to time. Material changes will be communicated via email to active subscribers. Continued use of our products after changes constitutes acceptance of the updated terms.</p>
+
+        <h2>11. Contact</h2>
+        <p>For questions about these terms, contact us at <a href="mailto:info@cannabizacademy.io">info@cannabizacademy.io</a> or through our <a href="#support" onclick="navigate('support')">support page</a>.</p>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>© 2026 Cannabiz Academy · Alokin Technology LLC</div>
+    <div class="footer-links">
+      <a href="#support" onclick="navigate('support')">Support</a>
+      <a href="#signin" onclick="navigate('signin')">Sign In</a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════
+     SUPPORT
+════════════════════════════════════ -->
+<div class="page" id="page-support">
+  <nav class="nav">
+    <a href="CBA Operator Toolkit v2.html"><img class="nav-logo" src="assets/logo-cba-white.png" alt="Cannabiz Academy"></a>
+    <div class="nav-right">
+      <a href="CBA Operator Toolkit v2.html" class="nav-link">Back to Toolkit</a>
+      <a href="#signin" onclick="navigate('signin')" class="nav-link">Sign In</a>
+    </div>
+  </nav>
+
+  <div class="page-hero">
+    <div class="container">
+      <div class="eyebrow">Cannabiz Academy</div>
+      <h1>We've got <span class="mint">you.</span></h1>
+      <p>Real people. Real replies. If your question isn't below, send it — we'll get back within one business day.</p>
+    </div>
+  </div>
+
+  <div class="body-section">
+    <div class="container">
+
+      <div class="support-grid">
+        <div class="support-option">
+          <div class="support-option-icon">📧</div>
+          <div class="support-option-name">Email Support</div>
+          <div class="support-option-desc">For order issues, access problems, refund requests, or anything that needs a human. We reply within one business day.</div>
+          <a href="mailto:info@cannabizacademy.io" class="support-option-cta">info@cannabizacademy.io →</a>
+        </div>
+        <div class="support-option">
+          <div class="support-option-icon">⚡</div>
+          <div class="support-option-name">Access Issues</div>
+          <div class="support-option-desc">Bought a tool but can't access it? Email us your order number and email address and we'll sort it manually — usually same day during beta.</div>
+          <a href="mailto:info@cannabizacademy.io?subject=Access Issue" class="support-option-cta">Report Access Issue →</a>
+        </div>
+      </div>
+
+      <div class="support-form">
+        <h3>Send a message.</h3>
+        <div class="form-group">
+          <label class="form-label">Your email</label>
+          <input class="form-input" type="email" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Topic</label>
+          <select class="select-input">
+            <option value="" disabled selected>Select a topic</option>
+            <option>I can't access a tool I purchased</option>
+            <option>Question about a calculator</option>
+            <option>PackTrack or Chain + Ticket question</option>
+            <option>Billing or refund request</option>
+            <option>QP Club or membership question</option>
+            <option>Beta program question</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message</label>
+          <textarea class="textarea-input" placeholder="Tell us what's going on. Include your order number if this is about a purchase."></textarea>
+        </div>
+        <button class="form-submit" onclick="handleSupport()">Send Message →</button>
+      </div>
+
+      <!-- Quick answers -->
+      <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:36px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:20px">Quick Answers</div>
+        <div style="display:flex;flex-direction:column;gap:0;border:1px solid rgba(255,255,255,.1)">
+          <div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08)">
+            <div style="font-size:14px;font-weight:600;margin-bottom:4px">I bought a calc but don't see it in my dashboard.</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.55)">Email info@cannabizacademy.io with your order number. We grant access manually during beta — usually same day.</div>
+          </div>
+          <div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08)">
+            <div style="font-size:14px;font-weight:600;margin-bottom:4px">When does beta end?</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.55)">We haven't set a fixed date yet. Beta users will receive 30-day, 7-day, and day-of notice before the transition. Your access never lapses.</div>
+          </div>
+          <div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08)">
+            <div style="font-size:14px;font-weight:600;margin-bottom:4px">Can I get a refund?</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.55)">Calculators: within 7 days if there's an access or delivery issue. Subscriptions: cancel anytime, no partial refunds. See our <a href="#terms" onclick="navigate('terms')" style="color:var(--cba-mint)">full terms</a>.</div>
+          </div>
+          <div style="padding:16px 20px">
+            <div style="font-size:14px;font-weight:600;margin-bottom:4px">How do I cancel my subscription?</div>
+            <div style="font-size:13px;color:rgba(255,255,255,.55)">Email info@cannabizacademy.io with your account email and we'll process it. Post-beta, self-serve cancellation will be in your dashboard.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>© 2026 Cannabiz Academy · Powered by Alokin Technology LLC</div>
+    <div class="footer-links">
+      <a href="#terms" onclick="navigate('terms')">Terms</a>
+      <a href="#signin" onclick="navigate('signin')">Sign In</a>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  const PAGES = ['signin','dashboard','terms','support'];
+
+  function navigate(page) {
+    PAGES.forEach(p => {
+      const el = document.getElementById('page-' + p);
+      if (el) el.classList.remove('active');
+    });
+    const target = document.getElementById('page-' + page);
+    if (target) { target.classList.add('active'); window.scrollTo(0,0); }
+    window.location.hash = page;
+  }
+
+  function handleSignIn() {
+    // Placeholder — wire to real auth
+    alert('Sign in functionality coming soon. Email info@cannabizacademy.io for beta dashboard access.');
+  }
+
+  function handleMagicLink() {
+    const email = document.getElementById('email').value;
+    if (!email) { document.getElementById('email').focus(); return; }
+    alert('Magic link sent to ' + email + ' — check your inbox.');
+  }
+
+  function handleSupport() {
+    alert('Message received — we\'ll reply within one business day. For faster help email info@cannabizacademy.io directly.');
+  }
+
+  function init() {
+    const hash = window.location.hash.replace('#','') || 'signin';
+    navigate(PAGES.includes(hash) ? hash : 'signin');
+  }
+
+  window.addEventListener('hashchange', () => {
+    const hash = window.location.hash.replace('#','') || 'signin';
+    navigate(PAGES.includes(hash) ? hash : 'signin');
+  });
+
+  init();
+</script>
+</body>
+</html>
