@@ -80,7 +80,7 @@ const FIX_SCRIPT = `
         if (stage.shadowRoot.querySelector('style[data-link-fix]')) return true;
         const s = document.createElement('style');
         s.setAttribute('data-link-fix', '1');
-        s.textContent = '.tapzones{z-index:1 !important;} ::slotted([data-deck-active]) a[href]{touch-action:manipulation;}';
+        s.textContent = '.stage{z-index:10 !important;} .tapzones{z-index:1 !important;}';
         stage.shadowRoot.appendChild(s);
         return true;
       };
