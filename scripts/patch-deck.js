@@ -72,21 +72,36 @@ if (rawTitle.test(html)) {
 
 // 4. Mobile tap-fix script
 const FIX_SCRIPT = `
-  <!-- Mobile link fix: demote tap-nav overlay z-index so links on slides stay tappable in portrait. -->
+  <!-- Mobile link fix: on slides that contain links, bump .stage above .tapzones so links stay
+       tappable in portrait. Slides without links keep default tapzones so tap-to-advance works. -->
   <script>
     (function () {
-      const apply = (stage) => {
+      const ready = (stage) => {
         if (!stage || !stage.shadowRoot) return false;
         if (stage.shadowRoot.querySelector('style[data-link-fix]')) return true;
-        const s = document.createElement('style');
-        s.setAttribute('data-link-fix', '1');
-        s.textContent = '.stage{z-index:10 !important;} .tapzones{z-index:1 !important;}';
-        stage.shadowRoot.appendChild(s);
+        const style = document.createElement('style');
+        style.setAttribute('data-link-fix', '1');
+        stage.shadowRoot.appendChild(style);
+        const setRaised = (raised) => {
+          style.textContent = raised
+            ? '.stage{z-index:10 !important;} .tapzones{z-index:1 !important;}'
+            : '';
+        };
+        const update = () => {
+          const active = stage.querySelector('section[data-deck-active]');
+          const hasLink = !!(active && active.querySelector('a[href]'));
+          setRaised(hasLink);
+        };
+        const obs = new MutationObserver(update);
+        stage.querySelectorAll('section').forEach((s) =>
+          obs.observe(s, { attributes: true, attributeFilter: ['data-deck-active'] })
+        );
+        update();
         return true;
       };
       const tryFix = () => {
         const stage = document.querySelector('deck-stage');
-        if (apply(stage)) return;
+        if (ready(stage)) return;
         requestAnimationFrame(tryFix);
       };
       if (window.customElements && customElements.whenDefined) {
