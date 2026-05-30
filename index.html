@@ -2232,61 +2232,11 @@
     </div>
   </footer>
 
-  <!-- VARIANT PILL -->
-  <div class="variant-pill" id="variantPill">
-    <button data-v="poster" class="active">Poster</button>
-    <button data-v="spec">Spec</button>
-    <button data-v="editorial">Editorial</button>
-  </div>
-
-  <!-- TWEAK TOGGLE + PANEL -->
-  <button class="tweak-toggle-btn" id="tweakToggle" onclick="openTweaks()">⚙ TWEAKS</button>
-  <div class="tweak-panel" id="tweakPanel">
-    <div class="tweak-head">
-      <span>Tweaks</span>
-      <button class="tweak-close" onclick="closeTweaks()">×</button>
-    </div>
-    <div class="tweak-body">
-      <div>
-        <div class="tweak-label">Variant</div>
-        <div class="tweak-variants">
-          <button class="tweak-variant" data-v="poster">
-            <div class="tweak-variant-dot"></div>
-            <div><span class="tweak-variant-name">Poster</span><span class="tweak-variant-desc">Black + mint. Animated ledger hero. Texture.</span></div>
-          </button>
-          <button class="tweak-variant" data-v="spec">
-            <div class="tweak-variant-dot"></div>
-            <div><span class="tweak-variant-name">Operator Spec</span><span class="tweak-variant-desc">Light, tabular, high-density operator sheet.</span></div>
-          </button>
-          <button class="tweak-variant" data-v="editorial">
-            <div class="tweak-variant-dot"></div>
-            <div><span class="tweak-variant-name">Editorial</span><span class="tweak-variant-desc">Magazine. Full Graduate slab. White pages.</span></div>
-          </button>
-        </div>
-      </div>
-      <div>
-        <div class="tweak-label">Headline</div>
-        <textarea class="tweak-input" id="tweakHead" rows="3"></textarea>
-      </div>
-      <div>
-        <div class="tweak-label">Sub-headline</div>
-        <textarea class="tweak-input" id="tweakSub" rows="3"></textarea>
-      </div>
-      <div>
-        <div class="tweak-label">Primary CTA</div>
-        <input class="tweak-input" id="tweakCta" type="text">
-      </div>
-      <div>
-        <div class="tweak-label">Texture + motion</div>
-        <label class="tweak-switch"><input type="checkbox" id="tweakGrain"><span>Grain overlay</span></label>
-        <label class="tweak-switch" style="margin-top:8px"><input type="checkbox" id="tweakMarquee"><span>Marquee band</span></label>
-      </div>
-    </div>
-  </div>
-
 <script>
   const LS_KEY = 'cba-toolkit-v2-tweaks';
   const state = Object.assign({}, TWEAK_DEFAULTS, JSON.parse(localStorage.getItem(LS_KEY) || '{}'));
+  // Site locked to Poster view for production. Variant selector + tweak panel removed.
+  state.variant = 'poster';
 
   function esc(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
@@ -2323,25 +2273,6 @@
   }
   function setState(patch) { Object.assign(state, patch); persist(); apply(); }
 
-  document.querySelectorAll('#variantPill button, .tweak-variant').forEach(b => {
-    b.addEventListener('click', () => setState({ variant: b.dataset.v }));
-  });
-  document.getElementById('tweakHead').addEventListener('input', e => setState({ heroHead: e.target.value }));
-  document.getElementById('tweakSub').addEventListener('input', e => setState({ heroSub: e.target.value }));
-  document.getElementById('tweakCta').addEventListener('input', e => setState({ primaryCta: e.target.value }));
-  document.getElementById('tweakGrain').addEventListener('change', e => setState({ grain: e.target.checked }));
-  document.getElementById('tweakMarquee').addEventListener('change', e => setState({ marquee: e.target.checked }));
-
-  function openTweaks() { document.getElementById('tweakPanel').classList.add('open'); document.getElementById('tweakToggle').style.display = 'none'; }
-  function closeTweaks() { document.getElementById('tweakPanel').classList.remove('open'); if (document.body.dataset.tweakVisible === 'true') document.getElementById('tweakToggle').style.display = 'inline-flex'; }
-  window.openTweaks = openTweaks; window.closeTweaks = closeTweaks;
-
-  window.addEventListener('message', ev => {
-    const d = ev.data || {};
-    if (d.type === '__activate_edit_mode') { document.body.dataset.tweakVisible = 'true'; document.getElementById('tweakToggle').style.display = 'inline-flex'; }
-    else if (d.type === '__deactivate_edit_mode') { document.body.dataset.tweakVisible = 'false'; document.getElementById('tweakToggle').style.display = 'none'; document.getElementById('tweakPanel').classList.remove('open'); }
-  });
-  try { window.parent.postMessage({ type: '__edit_mode_available' }, '*'); } catch (e) {}
 
   // FAQ accordions
   document.querySelectorAll('.faq-q').forEach(q => {
